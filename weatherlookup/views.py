@@ -11,10 +11,15 @@ def home(request):
         zipcode = request.POST['zipcode']
         api_request = requests.get("https://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode=" + zipcode + "&distance=20&API_KEY=E2DDB5EA-19AE-4607-92E1-0CA4F031EFE6")
         
+        #In case, we get no data from the API(in api_request), then it will raise an exception
         try:
-            api = json.loads(api_request.content)        
+            #Parse the JSON string into a Python dictionary
+            api = json.loads(api_request.content)   
+            if not api:
+                raise ValueError("No data returned from API")     
         except Exception as e:
             api = "Error...."
+            return render(request, 'home.html', {'api': api})
         
         if api[0]['Category']['Name'] == "Good":
             category_description = "(0-50) Air quality is considered satisfactory and air pollution poses little or no risk."
@@ -44,8 +49,11 @@ def home(request):
         
         try:
             api = json.loads(api_request.content)        
+            if not api:
+                raise ValueError("No data returned from API")
         except Exception as e:
             api = "Error...."
+            return render(request, 'home.html', {'api': api})
         
         if api[0]['Category']['Name'] == "Good":
             category_description = "(0-50) Air quality is considered satisfactory and air pollution poses little or no risk."
